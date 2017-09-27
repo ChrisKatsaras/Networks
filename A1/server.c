@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 		printf("Listening on port %s\n", portNumber);
 	} else {
 		perror("Error: Missing port number!\n");
-		return 0;
+		exit(EXIT_FAILURE);
 	}
 
 	memset(&serv, 0, sizeof(serv));
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 
 	if(bind(userSocket, (struct sockaddr *)&serv, sizeof(struct sockaddr)) == -1) {
 		perror("Unable to bind");
-		return 0;
+		exit(EXIT_FAILURE);
 	}
 
 	listen(userSocket, 1);

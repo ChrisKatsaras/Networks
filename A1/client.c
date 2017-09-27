@@ -8,16 +8,15 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <netdb.h>
-
-#define MAXBUFLEN 20
-#define MSGLEN 1000000
  
 int main(int argc, char *argv[])
 {
+	int MAXBUFLEN = 20;
 	struct addrinfo hints;
 	struct addrinfo *servinfo;
+	//FILE *fp = fopen(stdin, "r");
 	char * buffer = malloc(sizeof(MAXBUFLEN + 1)); 
-	char * msg = "Chris message that is to say, I cringe it up";
+	char * msg = "Sending a message over! Kind of big, so we gotta break it";
 	char * ip = NULL;
 	char * temp;
 	bool breakingUp = false;
@@ -56,7 +55,7 @@ int main(int argc, char *argv[])
 
  	if ((rv = getaddrinfo(ip, portString, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
 	mysocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -64,12 +63,14 @@ int main(int argc, char *argv[])
 	memset(&dest, 0, sizeof(dest));
 	
 	dest.sin_family = AF_INET;
-	dest.sin_addr.s_addr = htonl(INADDR_LOOPBACK); 
+	dest.sin_addr.s_addr = inet_addr(ip);
+	//dest.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 	dest.sin_port = htons(port);               
  	
  	//Connects to server
 	if(connect(mysocket, (struct sockaddr *)&dest, sizeof(struct sockaddr_in)) != 0) {
 		perror("Client unable to connect to server");
+		exit(EXIT_FAILURE);
 	}
 
 	//Needs to break the message into smaller chunks
