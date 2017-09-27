@@ -11,12 +11,12 @@
  
 int main(int argc, char *argv[])
 {
-	int MAXBUFLEN = 20;
+	int MAXBUFLEN = 10;
 	struct addrinfo hints;
 	struct addrinfo *servinfo;
 	//FILE *fp = fopen(stdin, "r");
 	char * buffer = malloc(sizeof(MAXBUFLEN + 1)); 
-	char * msg = "Sending a message over! Kind of big, so we gotta break it";
+	char * msg = "Sending a message over! Kind of big, so we gotta break it!";
 	char * ip = NULL;
 	char * temp;
 	bool breakingUp = false;
@@ -89,22 +89,26 @@ int main(int argc, char *argv[])
 				}
 				buffer[MAXBUFLEN] = '\0';
 				printf("%s  %lu\n",buffer, strlen(buffer));
+				sleep(1);//TEST
 				if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
 					printf("Send failed!\n");
 				}
 				counter += MAXBUFLEN;
 			} else {
-				buffer = malloc(sizeof((strlen(msg) - counter))); 
+
+				buffer = malloc(sizeof((strlen(msg) - counter)+1)); 
 				for(i=counter;i<strlen(msg);i++) {
 					buffer[j] = msg[i];
 					j++;
 				}
 				printf("%s  %lu\n",buffer, strlen(buffer));
-				send(mysocket, buffer, strlen(buffer), 0); 
+				sleep(1);//TEST
+				if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
+					printf("Send failed!\n");
+				}
 				counter += (strlen(msg) - counter);
 				breakingUp = false;
 			}
-			//printf("Counter:%d\n",counter);
 		}
 		
 	} else {
