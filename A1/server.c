@@ -8,14 +8,14 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-
+#define MAXBUFLEN 3
 int main(int argc, char *argv[]) {
 
 	char * portNumber;
 	int userSocket; 
 	struct sockaddr_in serv;
 	struct sockaddr_in client;
-	char buffer[500 + 1]; 
+	char * buffer = malloc(sizeof(MAXBUFLEN + 1)); 
 	int len;
 	socklen_t socksize = sizeof(struct sockaddr_in);
 	if(argc == 2) {
@@ -46,16 +46,20 @@ int main(int argc, char *argv[]) {
 	while(connection) {
 		printf("Incoming connection from %s \n", inet_ntoa(client.sin_addr));
 
-		len = recv(connection, buffer, 500, 0);
-		buffer[len] = '\0';
-		printf("Received %s\n", buffer);
+		len = recv(connection, buffer, MAXBUFLEN, 0);
+
+		//While there is more data to get
+		while(len > 0) {
+			buffer[len] = '\0';
+			printf("%s", buffer);
+			len = recv(connection, buffer, MAXBUFLEN, 0);
+		}
+		printf("\n");
 
 		send(connection, buffer, strlen(buffer), 0); 
 		
 		close(connection);
-		
 		connection = accept(userSocket, (struct sockaddr *)&client, &socksize);
-
 	}
 
 	close(userSocket);
