@@ -8,7 +8,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-#define MAXBUFLEN 3
+#define MAXBUFLEN 4096
 int main(int argc, char *argv[]) {
 
 	char * portNumber;
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	listen(userSocket, 1);
+	listen(userSocket, 10);
 
 	int connection = accept(userSocket, (struct sockaddr *)&client, &socksize);
 
@@ -54,9 +54,9 @@ int main(int argc, char *argv[]) {
 			printf("%s", buffer);
 			len = recv(connection, buffer, MAXBUFLEN, 0);
 		}
-		printf("\n");
+		printf("\n\n\n");
 
-		send(connection, buffer, strlen(buffer), 0); 
+		//send(connection, buffer, strlen(buffer), 0); 
 		
 		close(connection);
 		connection = accept(userSocket, (struct sockaddr *)&client, &socksize);

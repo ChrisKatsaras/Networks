@@ -11,36 +11,33 @@
  
 int main(int argc, char *argv[])
 {
-	int MAXBUFLEN = 10;
+	int MAXBUFLEN = 100;
 	struct addrinfo hints;
 	struct addrinfo *servinfo;
 	//FILE *fp = fopen(stdin, "r");
-	char * buffer = malloc(sizeof(MAXBUFLEN + 1)); 
-	char * msg = "Sending a message over! Kind of big, so we gotta break it!";
-	char * ip = NULL;
-	char * temp;
-	bool breakingUp = false;
+	char * buffer = calloc(MAXBUFLEN + 1,sizeof(char));
+	char hostName[100] = "localhost";
 	char portString[100];
+	//char * ip = NULL;
+	char * temp;
+	//bool breakingUp = false;
 	int port = 0;
 	int rv;
-	int i;
-	int counter = 0;
+	//int i;
+	//int counter = 0;
 	//int len;
 	int mysocket;
 	struct sockaddr_in dest;
 
- 	
  	if(argc != 2 && argc != 3) {
  		perror("Wrong number of arguements!");
  		EXIT_FAILURE;
  	} else {
  		temp = strtok(argv[1],":");
  		if(temp != NULL) {
- 			ip = temp;
+ 			strcpy(hostName, temp);
 	 		temp = strtok(NULL, ":");
-	 		port = atoi(temp);
-	 		sprintf(portString, "%d", port);
-	 		//printf("%s\n%d\n", ip, port);
+	 		strcpy(portString,temp);
  		}
 
  		//If the user specifies how big the buffer is
@@ -48,12 +45,13 @@ int main(int argc, char *argv[])
  			buffer = malloc(sizeof(atoi(argv[2]) + 1)); 
  		}
  	}
+ 	printf("THE HOST %s\n THE PORT %s\n", hostName,portString);
  	//Initialize infor for getaddr
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_DGRAM;
 
- 	if ((rv = getaddrinfo(ip, portString, &hints, &servinfo)) != 0) {
+ 	if ((rv = getaddrinfo(hostName, portString, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         exit(EXIT_FAILURE);
     }
@@ -63,9 +61,9 @@ int main(int argc, char *argv[])
 	memset(&dest, 0, sizeof(dest));
 	
 	dest.sin_family = AF_INET;
-	dest.sin_addr.s_addr = inet_addr(ip);
+	dest.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 	//dest.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-	dest.sin_port = htons(port);               
+	dest.sin_port = htons(atoi(portString));               
  	
  	//Connects to server
 	if(connect(mysocket, (struct sockaddr *)&dest, sizeof(struct sockaddr_in)) != 0) {
@@ -73,9 +71,33 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
+	char ch;
+	int count = 0;
+	while ((ch = fgetc(stdin)) != EOF) {
+		if(count > MAXBUFLEN) {
+			count = 0;
+			//sleep(1);
+			if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
+					printf("Send failed!\n");
+			}
+
+			free(buffer);
+			buffer = calloc(MAXBUFLEN + 1,sizeof(char)); 
+		} else {
+			buffer[count] = ch;
+			count++;
+		}
+		printf("%c", ch);
+	}
+
+	if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
+		printf("Send failed!\n");
+	}
+	//printf("THE IP: %s", ip);
+
 	//Needs to break the message into smaller chunks
-	if(strlen(msg) > MAXBUFLEN) {
-		int j;
+	//if(strlen(msg) > MAXBUFLEN) {
+		/*int j;
 		printf("Need to break up\n");
 		breakingUp = true;
 		while(breakingUp) {
@@ -109,11 +131,12 @@ int main(int argc, char *argv[])
 				counter += (strlen(msg) - counter);
 				breakingUp = false;
 			}
-		}
+		}*/
+
 		
-	} else {
-		send(mysocket, msg, strlen(msg), 0); 
-	}
+	//} else {
+		//send(mysocket, msg, strlen(msg), 0); 
+	//}
 
 	/*len = recv(mysocket, buffer, MAXBUFLEN, 0);
  	
