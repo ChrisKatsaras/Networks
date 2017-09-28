@@ -9,6 +9,16 @@
 #include <sys/socket.h>
 #include <netdb.h>
  
+void *get_in_addr(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+    
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+
 int main(int argc, char *argv[])
 {
 	int MAXBUFLEN = 100;
@@ -18,14 +28,9 @@ int main(int argc, char *argv[])
 	char * buffer = calloc(MAXBUFLEN + 1,sizeof(char));
 	char hostName[100] = "localhost";
 	char portString[100];
-	//char * ip = NULL;
+	char ipAddr[INET6_ADDRSTRLEN];
 	char * temp;
-	//bool breakingUp = false;
-	int port = 0;
 	int rv;
-	//int i;
-	//int counter = 0;
-	//int len;
 	int mysocket;
 	struct sockaddr_in dest;
 
@@ -45,7 +50,7 @@ int main(int argc, char *argv[])
  			buffer = malloc(sizeof(atoi(argv[2]) + 1)); 
  		}
  	}
- 	printf("THE HOST %s\n THE PORT %s\n", hostName,portString);
+
  	//Initialize infor for getaddr
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -55,14 +60,16 @@ int main(int argc, char *argv[])
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         exit(EXIT_FAILURE);
     }
-
+    
+    inet_ntop(servinfo->ai_family, get_in_addr((struct sockaddr *)servinfo->ai_addr), ipAddr, sizeof ipAddr);
+    printf("The IP is %s\n",ipAddr);
 	mysocket = socket(AF_INET, SOCK_STREAM, 0);
   
 	memset(&dest, 0, sizeof(dest));
 	
 	dest.sin_family = AF_INET;
-	dest.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-	//dest.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	//dest.sin_addr.s_addr = inet_addr(ipAddr); 
+	inet_aton(ipAddr, &(dest.sin_addr));
 	dest.sin_port = htons(atoi(portString));               
  	
  	//Connects to server
@@ -93,7 +100,8 @@ int main(int argc, char *argv[])
 	if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
 		printf("Send failed!\n");
 	}
-	//printf("THE IP: %s", ip);
+	
+
 
 	//Needs to break the message into smaller chunks
 	//if(strlen(msg) > MAXBUFLEN) {
