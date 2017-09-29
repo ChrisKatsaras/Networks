@@ -21,7 +21,7 @@ void *get_in_addr(struct sockaddr *sa)
 
 int main(int argc, char *argv[])
 {
-	int MAXBUFLEN = 100;
+	int MAXBUFLEN = 10000;
 	struct addrinfo hints;
 	struct addrinfo *servinfo;
 	//FILE *fp = fopen(stdin, "r");
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         exit(EXIT_FAILURE);
     }
-    
+
     inet_ntop(servinfo->ai_family, get_in_addr((struct sockaddr *)servinfo->ai_addr), ipAddr, sizeof ipAddr);
     printf("The IP is %s\n",ipAddr);
 	mysocket = socket(AF_INET, SOCK_STREAM, 0);
