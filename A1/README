@@ -5,10 +5,28 @@ Christopher Katsaras
 Student # 0795555
 
 
-How to compile:
+Compile:
 
 	Type "make" or "make all" to compile both client and server
 
 
-How to remove all executables and intermediate files 
+Remove all executables and intermediate files 
 	Type "make clean"
+
+
+Run:
+
+	Server: Type "./server portnumber" where portnumber is a valid port number (e.g 2300)
+
+	Client: Type "./client hostname:portnumber" where hostname is a valid hostname and portnumber is a valid port number (e.g chriskatsaras:3000)
+
+TO RUN TESTING SCRIPT:
+
+I have created a testing script that will run multiple clients at once, this script will have seperate clients send different files (usually around 1MB each) to the server.
+
+FOR LOCALHOST:
+If you are testing on local host, type "python localhost:portnumber"
+
+FOR LINUX.SOCS.UOGUELPH.CA:
+If you are testing on the University's Linux terminals, "type python script.py servername" where servername is the name of the server. Some examples of SOCS servers are ginny.socs.uoguelph.ca , fred.socs.uoguelph.ca , george.socs.uoguelph.ca. This script has been created to make grading easier for you but if for any reason you are having issues using it, please feel free to message me! :) 
+
