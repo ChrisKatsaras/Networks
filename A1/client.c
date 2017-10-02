@@ -8,9 +8,9 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <time.h>
  
-void *get_in_addr(struct sockaddr *sa)
-{
+void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in*)sa)->sin_addr);
     }
@@ -19,8 +19,7 @@ void *get_in_addr(struct sockaddr *sa)
 }
 
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 	int MAXBUFLEN = 10000;
 	struct addrinfo hints;
 	struct addrinfo *servinfo;
@@ -62,7 +61,7 @@ int main(int argc, char *argv[])
     }
 
     inet_ntop(servinfo->ai_family, get_in_addr((struct sockaddr *)servinfo->ai_addr), ipAddr, sizeof ipAddr);
-    printf("The IP is %s\n",ipAddr);
+    //printf("The IP is %s\n",ipAddr);
 	mysocket = socket(AF_INET, SOCK_STREAM, 0);
   
 	memset(&dest, 0, sizeof(dest));
@@ -80,6 +79,7 @@ int main(int argc, char *argv[])
 
 	char ch;
 	int count = 0;
+	clock_t begin = clock();
 	while ((ch = fgetc(stdin)) != EOF) {
 		if(count > MAXBUFLEN) {
 			count = 0;
@@ -94,13 +94,15 @@ int main(int argc, char *argv[])
 			buffer[count] = ch;
 			count++;
 		}
-		printf("%c", ch);
+		//printf("%c", ch);
 	}
 
 	if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
 		printf("Send failed!\n");
 	}
-	
+	clock_t end = clock();
+	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	printf("%lf\n", time_spent);
 
 
 	//Needs to break the message into smaller chunks

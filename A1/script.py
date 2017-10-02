@@ -8,7 +8,7 @@ def func1(env):
     if (env == "local"):
         os.system("./client localhost:12040  < test.txt");
     elif(env == "george" or env == "fred" or env == "percy" or env == "ginny"):
-        os.system("./client "+env+".socs.uoguelph.ca:12040  < test.txt");
+        os.system("./client "+env+".socs.uoguelph.ca:12040  < alice.txt");
 
 def func2(env):
     if (env == "local"):
