@@ -8,7 +8,8 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include <time.h>
+#include <sys/time.h>
+
  
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
@@ -20,7 +21,7 @@ void *get_in_addr(struct sockaddr *sa) {
 
 
 int main(int argc, char *argv[]) {
-	int MAXBUFLEN = 100;
+	int MAXBUFLEN = 4096;
 	struct addrinfo hints;
 	struct addrinfo *servinfo;
 	//FILE *fp = fopen(stdin, "r");
@@ -32,7 +33,8 @@ int main(int argc, char *argv[]) {
 	int rv;
 	int mysocket;
 	struct sockaddr_in dest;
-
+	struct timeval start, stop;
+    
  	if(argc != 2 && argc != 3) {
  		perror("Wrong number of arguements!");
  		EXIT_FAILURE;
@@ -79,6 +81,8 @@ int main(int argc, char *argv[]) {
 
 	char ch;
 	int count = 0;
+	
+	gettimeofday(&start, NULL);
 
 	while ((ch = fgetc(stdin)) != EOF) {
 		if(count > MAXBUFLEN) {
@@ -100,6 +104,17 @@ int main(int argc, char *argv[]) {
 	if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
 		printf("Send failed!\n");
 	}
+	gettimeofday(&stop, NULL);
+
+	//printf("Duration: %ld.%d\n", (stop.tv_sec - start.tv_sec),(stop.tv_usec-start.tv_usec)/1000); 
+
+
+	double result = (((stop.tv_sec - start.tv_sec) + ((double)stop.tv_usec) / 1000000) - ((double)start.tv_usec) / 1000000);
+
+	printf("The time it took %lf\n", result);
+
+
+
 
 	//Needs to break the message into smaller chunks
 	//if(strlen(msg) > MAXBUFLEN) {

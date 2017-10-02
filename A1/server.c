@@ -9,7 +9,7 @@
 #include <sys/socket.h>
 #include <time.h>
 
-#define MAXBUFLEN 100
+#define MAXBUFLEN 4096
 int main(int argc, char *argv[]) {
 
 	char * portNumber;
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in client;
 	char * buffer = malloc(sizeof(MAXBUFLEN + 1)); 
 	int len;
-	clock_t t;
+
 	socklen_t socksize = sizeof(struct sockaddr_in);
 	if(argc == 2) {
 		portNumber = argv[1];
@@ -48,8 +48,7 @@ int main(int argc, char *argv[]) {
 	while(connection) {
 		printf("Incoming connection from %s \n", inet_ntoa(client.sin_addr));
 		len = recv(connection, buffer, MAXBUFLEN, 0);
-		t = clock();
-		printf("%lf\n",(double)t);
+
 		//While there is more data to get
 		while(len > 0) {
 			buffer[len] = '\0';
@@ -58,10 +57,7 @@ int main(int argc, char *argv[]) {
 			len = recv(connection, buffer, MAXBUFLEN, 0);
 		}
 		printf("\n\n\n");
-		t = clock() - t;
-		printf("%lf\n",(double)t);
-		double time_spent = ((double)t)/CLOCKS_PER_SEC; // in seconds
-		printf("%lf\n", time_spent);
+
 		//send(connection, buffer, strlen(buffer), 0); 
 		
 		close(connection);
