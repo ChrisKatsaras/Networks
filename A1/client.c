@@ -20,7 +20,7 @@ void *get_in_addr(struct sockaddr *sa) {
 
 
 int main(int argc, char *argv[]) {
-	int MAXBUFLEN = 10000;
+	int MAXBUFLEN = 100;
 	struct addrinfo hints;
 	struct addrinfo *servinfo;
 	//FILE *fp = fopen(stdin, "r");
@@ -79,13 +79,13 @@ int main(int argc, char *argv[]) {
 
 	char ch;
 	int count = 0;
-	clock_t begin = clock();
+
 	while ((ch = fgetc(stdin)) != EOF) {
 		if(count > MAXBUFLEN) {
 			count = 0;
 			//sleep(1);
 			if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
-					printf("Send failed!\n");
+				printf("Send failed!\n");
 			}
 
 			free(buffer);
@@ -100,10 +100,6 @@ int main(int argc, char *argv[]) {
 	if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
 		printf("Send failed!\n");
 	}
-	clock_t end = clock();
-	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-	printf("%lf\n", time_spent);
-
 
 	//Needs to break the message into smaller chunks
 	//if(strlen(msg) > MAXBUFLEN) {
