@@ -24,7 +24,6 @@ int main(int argc, char *argv[]) {
 	int MAXBUFLEN = 4096;
 	struct addrinfo hints;
 	struct addrinfo *servinfo;
-	//FILE *fp = fopen(stdin, "r");
 	char * buffer = calloc(MAXBUFLEN + 1,sizeof(char));
 	char hostName[100] = "localhost";
 	char portString[100];
@@ -43,12 +42,26 @@ int main(int argc, char *argv[]) {
  		if(temp != NULL) {
  			strcpy(hostName, temp);
 	 		temp = strtok(NULL, ":");
-	 		strcpy(portString,temp);
+	 		if(temp != NULL) {
+	 			strcpy(portString,temp);
+	 		} else {
+	 			printf("Incorrect format! Correct format is hostname:portnum\n");
+	 			exit(EXIT_FAILURE);
+	 		}
+ 		} else {
+ 			printf("Incorrect format! Correct format is hostname:portnum\n");
+ 			exit(EXIT_FAILURE);
  		}
 
  		//If the user specifies how big the buffer is
  		if(argc == 3) {
- 			buffer = malloc(sizeof(atoi(argv[2]) + 1)); 
+ 			MAXBUFLEN = atoi(argv[2]);
+ 			if(MAXBUFLEN == 0) {
+ 				printf("Invalid value for buffer length!\n");
+ 				exit(EXIT_FAILURE);
+ 			}
+ 			free(buffer);
+ 			buffer = calloc(MAXBUFLEN + 1,sizeof(char)); 
  		}
  	}
 
@@ -63,13 +76,11 @@ int main(int argc, char *argv[]) {
     }
 
     inet_ntop(servinfo->ai_family, get_in_addr((struct sockaddr *)servinfo->ai_addr), ipAddr, sizeof ipAddr);
-    //printf("The IP is %s\n",ipAddr);
 	mysocket = socket(AF_INET, SOCK_STREAM, 0);
   
 	memset(&dest, 0, sizeof(dest));
 	
 	dest.sin_family = AF_INET;
-	//dest.sin_addr.s_addr = inet_addr(ipAddr); 
 	inet_aton(ipAddr, &(dest.sin_addr));
 	dest.sin_port = htons(atoi(portString));               
  	
@@ -87,7 +98,6 @@ int main(int argc, char *argv[]) {
 	while ((ch = fgetc(stdin)) != EOF) {
 		if(count > MAXBUFLEN) {
 			count = 0;
-			//sleep(1);
 			if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
 				printf("Send failed!\n");
 			}
@@ -106,64 +116,9 @@ int main(int argc, char *argv[]) {
 	}
 	gettimeofday(&stop, NULL);
 
-	//printf("Duration: %ld.%d\n", (stop.tv_sec - start.tv_sec),(stop.tv_usec-start.tv_usec)/1000); 
-
-
 	double result = (((stop.tv_sec - start.tv_sec) + ((double)stop.tv_usec) / 1000000) - ((double)start.tv_usec) / 1000000);
 
-	printf("The time it took %lf\n", result);
-
-
-
-
-	//Needs to break the message into smaller chunks
-	//if(strlen(msg) > MAXBUFLEN) {
-		/*int j;
-		printf("Need to break up\n");
-		breakingUp = true;
-		while(breakingUp) {
-			j=0;
-			if(strlen(msg) - counter > MAXBUFLEN) {
-				
-				for(i=counter;i<counter+MAXBUFLEN;i++) {
-					//printf("%c", msg[i]);
-					buffer[j] = msg[i];
-					j++;
-				}
-				buffer[MAXBUFLEN] = '\0';
-				printf("%s  %lu\n",buffer, strlen(buffer));
-				sleep(1);//TEST
-				if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
-					printf("Send failed!\n");
-				}
-				counter += MAXBUFLEN;
-			} else {
-
-				buffer = malloc(sizeof((strlen(msg) - counter)+1)); 
-				for(i=counter;i<strlen(msg);i++) {
-					buffer[j] = msg[i];
-					j++;
-				}
-				printf("%s  %lu\n",buffer, strlen(buffer));
-				sleep(1);//TEST
-				if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
-					printf("Send failed!\n");
-				}
-				counter += (strlen(msg) - counter);
-				breakingUp = false;
-			}
-		}*/
-
-		
-	//} else {
-		//send(mysocket, msg, strlen(msg), 0); 
-	//}
-
-	/*len = recv(mysocket, buffer, MAXBUFLEN, 0);
- 	
-	buffer[len] = '\0';
- 
-	printf("Received %s (%d bytes).\n", buffer, len);*/
+	printf("%lf\n", result);
  
 	close(mysocket);
 	return EXIT_SUCCESS;
