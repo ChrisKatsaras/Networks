@@ -6,7 +6,7 @@ from multiprocessing import Process
 
 def func1(env):
     if (env == "local"):
-        os.system("./client localhost:12040  < test.txt");
+        os.system("./client localhost:12040  < alice.txt");
     elif(env == "george" or env == "fred" or env == "percy" or env == "ginny"):
         os.system("./client "+env+".socs.uoguelph.ca:12040  < alice.txt");
 
@@ -22,9 +22,9 @@ def func3(env):
         os.system("./client "+env+".socs.uoguelph.ca:12040  < startrek.txt");
 def func4(env):
     if (env == "local"):
-        os.system("./client localhost:12040  < another.txt");
+        os.system("./client localhost:12040  < eightydays.txt");
     elif(env == "george" or env == "fred" or env == "percy" or env == "ginny"):
-        os.system("./client "+env+".socs.uoguelph.ca:12040  < another.txt");
+        os.system("./client "+env+".socs.uoguelph.ca:12040  < eightydays.txt");
 if __name__ == '__main__':
     p1 = Process(target=func1(sys.argv[1]))
     p1.start()

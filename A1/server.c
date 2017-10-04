@@ -52,12 +52,9 @@ int main(int argc, char *argv[]) {
 		//While there is more data to get
 		while(len > 0) {
 			buffer[len] = '\0';
-			//printf("%s", buffer);
 			len = recv(connection, buffer, MAXBUFLEN, 0);
 		}
 		printf("\n\n\n");
-
-		//send(connection, buffer, strlen(buffer), 0); 
 		
 		close(connection);
 		connection = accept(userSocket, (struct sockaddr *)&client, &socksize);

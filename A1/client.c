@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 	int rv;
 	int mysocket;
 	struct sockaddr_in dest;
-	struct timeval start, stop;
+	//struct timeval start, stop; Code for timing execution
     
  	if(argc != 2 && argc != 3) {
  		perror("Wrong number of arguements!");
@@ -93,7 +93,8 @@ int main(int argc, char *argv[]) {
 	char ch;
 	int count = 0;
 	
-	gettimeofday(&start, NULL);
+	//Code for timing execution
+	//gettimeofday(&start, NULL);
 
 	while ((ch = fgetc(stdin)) != EOF) {
 		if(count > MAXBUFLEN) {
@@ -108,17 +109,19 @@ int main(int argc, char *argv[]) {
 			buffer[count] = ch;
 			count++;
 		}
-		//printf("%c", ch);
 	}
 
 	if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
 		printf("Send failed!\n");
 	}
+	
+	/*
+	Code for timing execution
 	gettimeofday(&stop, NULL);
 
 	double result = (((stop.tv_sec - start.tv_sec) + ((double)stop.tv_usec) / 1000000) - ((double)start.tv_usec) / 1000000);
 
-	printf("%lf\n", result);
+	printf("%lf\n", result);*/
  
 	close(mysocket);
 	return EXIT_SUCCESS;
