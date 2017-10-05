@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) {
 		//While there is more data to get
 		while(len > 0) {
 			buffer[len] = '\0';
+			printf("%s", buffer); //Outputs message "chunk"
 			len = recv(connection, buffer, MAXBUFLEN, 0);
 		}
 		printf("\n\n\n");

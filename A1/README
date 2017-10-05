@@ -18,6 +18,7 @@ script.py - Testing script you can use to spawn multiple clients
 test.py - Script I wrote to run performance tests (included so you can understand how I ran 		  my performance tests)
 
 *.txt - Any .txt file included are files I used to test throughout the development of A1
+		(Please note that eightydays.txt had to be shrunk to accomidate the filesize cap on Moodle)
 
 A1ReportPDF - Contains the results of my tests
 
@@ -83,6 +84,7 @@ List of text files used in testing script:
 	alice.txt - 1.5 MB
 	kingsquest.txt - 558 KB
 	startrek.txt - 401 KB
-	eightydays.txt - 77.9 MB
+	eightydays.txt - 38.9 MB (NOTE! THIS IS DIFFERENT THAN MY TESTING FILE SIZE OF    
+					eightydays.txt. I HAD TO MAKE IT SMALLER DUE TO THE 20MB SUBMISSION SIZE ON MOODLE)
 
 
