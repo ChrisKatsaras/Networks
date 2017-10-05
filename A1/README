@@ -2,9 +2,27 @@ Assignment 1 : CIS* 3210
 October 6, 2017
 
 Christopher Katsaras
+ckatsara@uoguelph.ca
 Student # 0795555
 Assigned port number = 12040
 
+**********************************************
+FILES:
+
+client.c - Contains client code
+
+server.c - Contains server code 
+
+script.py - Testing script you can use to spawn multiple clients
+
+test.py - Script I wrote to run performance tests (included so you can understand how I ran 		  my performance tests)
+
+*.txt - Any .txt file included are files I used to test throughout the development of A1
+
+A1ReportPDF - Contains the results of my tests
+
+
+**********************************************
 
 **********************************************
 IMPORTANT NOTES:
@@ -13,7 +31,6 @@ IMPORTANT NOTES:
 
 	client.c can optionally take an argument for buffer size but will also default to 
 	4096 if a size is not given.
-
 
 **********************************************
 Compile:

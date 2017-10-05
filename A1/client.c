@@ -1,3 +1,7 @@
+/**
+ * client.c
+ * Christopher Katsaras
+ */
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
