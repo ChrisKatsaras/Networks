@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in dest;
 	//struct timeval start, stop; Code for timing execution
     
- 	if(argc != 2 && argc != 3) {
+ 	if(argc != 2 && argc != 3 && argc != 4) {
  		perror("Wrong number of arguements!");
  		EXIT_FAILURE;
  	} else {
@@ -99,6 +99,15 @@ int main(int argc, char *argv[]) {
 	
 	//Code for timing execution
 	//gettimeofday(&start, NULL);
+	strcpy(buffer, argv[2]);
+	strcat(buffer, " ");
+	if(send(mysocket, buffer , strlen(buffer), 0) != strlen(buffer)) {
+		printf("Send failed!\n");
+	}
+	strcpy(buffer, argv[3]);
+	if(send(mysocket, buffer , strlen(buffer), 0) != strlen(buffer)) {
+		printf("Send failed!\n");
+	}
 
 	while ((ch = fgetc(stdin)) != EOF) {
 		if(count > MAXBUFLEN) {
@@ -106,7 +115,6 @@ int main(int argc, char *argv[]) {
 			if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
 				printf("Send failed!\n");
 			}
-
 			free(buffer);
 			buffer = calloc(MAXBUFLEN + 1,sizeof(char)); 
 		} else {

@@ -1,0 +1,13 @@
+A2
+CIS * 3210
+October 31st, 2017
+
+Christopher Katsaras & Connor Geddes
+
+
+********************
+File name collisions
+********************
+
+We decided our resolution for filename collision will be prompting a user to append a number to their filename to resolve the conflict. e.g if chris.txt is already taken, the user will be asked if they would prefer to save their file as chris1.txt.
+
