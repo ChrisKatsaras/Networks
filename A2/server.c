@@ -31,9 +31,10 @@ void * writeFile(void * arg){
 	int connection = data->connection;
 	int len;
 	len = recv(connection, buffer, MAXBUFLEN, 0);
-
+	printf("%s\n", buffer);
 	fp = fopen(buffer ,"a");
-	fputs("WERE HERE!", fp);
+
+	free(buffer);
 	//While there is more data to get
 	while(len > 0) {
 		buffer = calloc(MAXBUFLEN + 1,sizeof(char)); 
@@ -41,6 +42,7 @@ void * writeFile(void * arg){
 		buffer[len] = '\0';
 		printf("%s\n", buffer); //Outputs message "chunk"
 		fputs(buffer, fp);
+		free(buffer);
 	}
 	
 	printf("\n\n\n");
@@ -54,7 +56,6 @@ void * writeFile(void * arg){
 void * uiThread(void * arg) {	
 	int * exit = (int *) arg;
 	int userOption;
-	//printf()
 
 	while(*exit == 0) {
 

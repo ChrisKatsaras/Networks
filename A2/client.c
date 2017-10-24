@@ -36,9 +36,10 @@ int main(int argc, char *argv[]) {
 	int rv;
 	int mysocket;
 	struct sockaddr_in dest;
+	int fileSize = 0;
 	//struct timeval start, stop; Code for timing execution
     
- 	if(argc != 2 && argc != 3 && argc != 4) {
+ 	if(argc != 2 && argc != 3 && argc != 4 && argc != 5) {
  		perror("Wrong number of arguements!");
  		EXIT_FAILURE;
  	} else {
@@ -67,6 +68,8 @@ int main(int argc, char *argv[]) {
  			free(buffer);
  			buffer = calloc(MAXBUFLEN + 1,sizeof(char)); 
  		}
+
+ 		fileSize = atoi(argv[4]);
  	}
 
  	//Initialize infor for getaddr
@@ -96,18 +99,17 @@ int main(int argc, char *argv[]) {
 
 	char ch;
 	int count = 0;
-	
 	//Code for timing execution
 	//gettimeofday(&start, NULL);
 	strcpy(buffer, argv[2]);
 	strcat(buffer, " ");
+	strcat(buffer, argv[3]);
+	strcat(buffer, " ");
+	strcat(buffer, argv[4]);
 	if(send(mysocket, buffer , strlen(buffer), 0) != strlen(buffer)) {
 		printf("Send failed!\n");
 	}
-	strcpy(buffer, argv[3]);
-	if(send(mysocket, buffer , strlen(buffer), 0) != strlen(buffer)) {
-		printf("Send failed!\n");
-	}
+	
 
 	while ((ch = fgetc(stdin)) != EOF) {
 		if(count > MAXBUFLEN) {
