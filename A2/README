@@ -4,10 +4,40 @@ October 31st, 2017
 
 Christopher Katsaras & Connor Geddes
 
+**********************************************
+Compile:
+**********************************************
 
-********************
+	Type "make" or "make all" to compile both client and server
+
+
+**********************************************
+Remove all executables and intermediate files 
+**********************************************
+
+	Type "make clean"
+
+
+**********************************************
+Run:
+**********************************************
+
+	Server: 
+		Type "./server portnumber" 
+		- Where portnumber is a valid port number (e.g 2300)
+
+	Client: 
+		type "./client hostname:portnumber chunkSize filenameToWriteTo fileSize filenameLength < filenameToReadFrom"
+		- Where hostname is a valid host (e.g chriskatsaras.com)
+		- Where portnumber is a valid port number (e.g 2300)
+		- Where chunkSize is a valid 8-byte int (e.g 4096)
+		- Where filenameToWriteTo is a valid filename (e.g connor.txt)
+		- Where fileSize is a valid 8-byte in (e.g 12345678)
+		- Where fileNameLength is the length of filenameToWriteTo. This is necessary for the 	  protocol which Dennis instructed us to do in class
+
+**********************************************
 File name collisions
-********************
+**********************************************
 
 We decided our resolution for filename collision will be prompting a user to append a number to their filename to resolve the conflict. e.g if chris.txt is already taken, the user will be asked if they would prefer to save their file as chris1.txt.
 

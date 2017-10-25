@@ -6,23 +6,23 @@ from multiprocessing import Process
 
 def func1(env):
     if (env == "local"):
-        os.system("./client localhost:12040  < alice.txt");
+        os.system("./client localhost:12040 4096 test1.txt 41231233 9 < alice.txt");
     elif(env == "george" or env == "fred" or env == "percy" or env == "ginny"):
         os.system("./client "+env+".socs.uoguelph.ca:12040  < alice.txt");
 
 def func2(env):
     if (env == "local"):
-        os.system("./client localhost:12040  < kingsquest.txt");
+        os.system("./client localhost:12040 4096 test2.txt 41231233 9 < kingsquest.txt");
     elif(env == "george" or env == "fred" or env == "percy" or env == "ginny"):
         os.system("./client "+env+".socs.uoguelph.ca:12040  < kingsquest.txt");
 def func3(env):
     if (env == "local"):
-        os.system("./client localhost:12040  < startrek.txt");
+        os.system("./client localhost:12040 4096 test3.txt 41231233 9 < startrek.txt");
     elif(env == "george" or env == "fred" or env == "percy" or env == "ginny"):
         os.system("./client "+env+".socs.uoguelph.ca:12040  < startrek.txt");
 def func4(env):
     if (env == "local"):
-        os.system("./client localhost:12040  < eightydays.txt");
+        os.system("./client localhost:12040 4096 test4.txt 41231233 9 < eightydays.txt");
     elif(env == "george" or env == "fred" or env == "percy" or env == "ginny"):
         os.system("./client "+env+".socs.uoguelph.ca:12040  < eightydays.txt");
 if __name__ == '__main__':

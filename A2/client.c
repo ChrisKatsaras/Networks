@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <sys/time.h>
+#include <stdint.h>
 
  
 void *get_in_addr(struct sockaddr *sa) {
@@ -35,11 +36,12 @@ int main(int argc, char *argv[]) {
 	char * temp;
 	int rv;
 	int mysocket;
+	char ch;
+	int count = 0;
 	struct sockaddr_in dest;
-	int fileSize = 0;
 	//struct timeval start, stop; Code for timing execution
     
- 	if(argc != 2 && argc != 3 && argc != 4 && argc != 5) {
+ 	if(argc != 2 && argc != 3 && argc != 4 && argc != 5 && argc != 6) {
  		perror("Wrong number of arguements!");
  		EXIT_FAILURE;
  	} else {
@@ -68,8 +70,6 @@ int main(int argc, char *argv[]) {
  			free(buffer);
  			buffer = calloc(MAXBUFLEN + 1,sizeof(char)); 
  		}
-
- 		fileSize = atoi(argv[4]);
  	}
 
  	//Initialize infor for getaddr
@@ -97,19 +97,28 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	char ch;
-	int count = 0;
-	//Code for timing execution
-	//gettimeofday(&start, NULL);
-	strcpy(buffer, argv[2]);
-	strcat(buffer, " ");
-	strcat(buffer, argv[3]);
-	strcat(buffer, " ");
-	strcat(buffer, argv[4]);
-	if(send(mysocket, buffer , strlen(buffer), 0) != strlen(buffer)) {
+	//Sends chunk size
+	uint64_t chunkSize = htonll(atoi(argv[2]));
+	if(send(mysocket, &chunkSize, sizeof(uint64_t), 0) != sizeof(uint64_t)) {
 		printf("Send failed!\n");
 	}
-	
+
+	//Sends file size
+	uint64_t filesize = htonll(atoi(argv[4]));
+	if(send(mysocket, &filesize, sizeof(uint64_t), 0) != sizeof(uint64_t)) {
+		printf("Send failed!\n");
+	}
+
+	//Sends filenames length
+	uint64_t filenameLength = htonll(atoi(argv[5]));
+	if(send(mysocket, &filenameLength, sizeof(uint64_t), 0) != sizeof(uint64_t)) {
+		printf("Send failed!\n");
+	}
+
+	//Sends filename
+	if(send(mysocket, argv[3], strlen(argv[3]), 0) != (int)ntohll(filenameLength)) {
+		printf("Send failed!\n");
+	}
 
 	while ((ch = fgetc(stdin)) != EOF) {
 		if(count > MAXBUFLEN) {
@@ -128,14 +137,6 @@ int main(int argc, char *argv[]) {
 	if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
 		printf("Send failed!\n");
 	}
-	
-	/*
-	Code for timing execution
-	gettimeofday(&stop, NULL);
-
-	double result = (((stop.tv_sec - start.tv_sec) + ((double)stop.tv_usec) / 1000000) - ((double)start.tv_usec) / 1000000);
-
-	printf("%lf\n", result);*/
  
 	close(mysocket);
 	return EXIT_SUCCESS;
