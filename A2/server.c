@@ -80,6 +80,8 @@ void * writeFile(void * arg){
 void * uiThread(void * arg) {	
 	int * exit = (int *) arg;
 	int userOption;
+	pthread_mutex_t lock;
+	pthread_mutex_init(&lock, NULL);
 
 	while(*exit == 0) {
 
@@ -92,7 +94,9 @@ void * uiThread(void * arg) {
 		if(userOption == 1) {
 			//Show active transfers
 		} else if(userOption == 2) {
+			pthread_mutex_lock(&lock); //Locks
 			*exit = 1;//Shuts down server
+			pthread_mutex_unlock(&lock); //Unlocks
 		} else {
 			printf("Invalid choice!\n");
 		}
