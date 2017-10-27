@@ -24,10 +24,15 @@ void printQueue(TransferQueue *q) {
 
 	TransferNode *tempNode = q->head;
 
+	if(tempNode == NULL) {
+		printf("no files being transferred\n\n\n\n");
+	}
+	int tranNum = 1;
 	while(tempNode != NULL) {
-		printf("The fileName is %s and the fileSize is %d \n", tempNode->tran.fileName, tempNode->tran.fileSize);
+		printf("Transfer number: %d\tFile name: %s\tFile size: %d\n\n\n", tranNum, tempNode->tran.fileName, tempNode->tran.fileSize);
 
 		tempNode = tempNode->next;
+		tranNum++;
 	}
 }
 
@@ -47,8 +52,9 @@ bool noCollision(TransferQueue *q, char *newFile) {
 	TransferNode *tempNode = q->head;
 
 	while(tempNode != NULL) {
+		printf("%s == %s", newFile, tempNode->tran.fileName);
 		if(strcmp(newFile, tempNode->tran.fileName) == 0) {
-			puts("COLLISION DETECTED");
+			//collision detected here
 			return false;
 		}
 
@@ -63,7 +69,8 @@ void * writeFile(void * arg){
 	char * buffer = malloc(sizeof(MAXBUFLEN + 1)); //Buffer for transfer
 	char * fileName;
 	ThreadArgs * myThreadArg = (ThreadArgs*)arg;
-	int *connection = &myThreadArg->connection;
+	printf("ASDASDSDAS %d",myThreadArg->spot);
+	int *connection = &myThreadArg->connection[myThreadArg->spot];
 	//int * connection = (int*)arg; //Connection var for socket
 	int len; //Len for transfer
 	int chunkSize;
@@ -97,42 +104,55 @@ void * writeFile(void * arg){
 	printf("Filename %s\n", fileName);
 
 	//TODO: Check filename for collision
-	
-	//sendTransfer(myThreadArg->q, fileName, fileSize);
 	if(noCollision(myThreadArg->q, fileName)) {
+		strcpy(buffer, "1");
+		printf("BEFORE");
+		printf("AFTER");
+		send(*connection, buffer, 1, 0);
 		sendTransfer(myThreadArg->q, fileName, fileSize); // adds fileName and fileSize to our queue 
+		fp = fopen(fileName ,"a");
+		//While there is more data to get
+		while(len > 0) {
+			buffer = calloc(chunkSize + 1,sizeof(char)); 
+			len = recv(*connection, buffer, chunkSize, 0);
+			//printf("%d\n", len);
+			buffer[len] = '\0';
+			//printf("%s\n", buffer); //Outputs message "chunk"
+			fputs(buffer, fp);
+			free(buffer);
+			//printf("RECV\n");
+		}
+
+		printf("\n\n\n");
+		printf("Closing file\n");
+		Transfer tran; 
+		getTransfer(myThreadArg->q, &tran); // remove from the queue
+		fclose(fp);
 	} else {
-		puts("file not added due to collision");
+		strcpy(buffer, "0");
+		send(*connection, buffer, 1, 0);
+		printf("ERROR FILE_COLLISION: CURRENTLY RUNNING THREAD WITH IDENTICAL FILE_NAME %s\n", fileName);
 	}
-	printQueue(myThreadArg->q); // temporary print of the queues contents
-	fp = fopen(fileName ,"a");
+	//fp = fopen(fileName ,"a");
 
-	//While there is more data to get
-	while(len > 0) {
-		buffer = calloc(chunkSize + 1,sizeof(char)); 
-		len = recv(*connection, buffer, chunkSize, 0);
-		buffer[len] = '\0';
-		//printf("%s\n", buffer); //Outputs message "chunk"
-		fputs(buffer, fp);
-		free(buffer);
-	}
+	// //While there is more data to get
+	// while(len > 0) {
+	// 	buffer = calloc(chunkSize + 1,sizeof(char)); 
+	// 	len = recv(*connection, buffer, chunkSize, 0);
+	// 	buffer[len] = '\0';
+	// 	//printf("%s\n", buffer); //Outputs message "chunk"
+	// 	fputs(buffer, fp);
+	// 	free(buffer);
+	// }
 
-	printf("\n\n\n");
-	printf("Closing file\n");
-	Transfer tran; 
-	printf("THESE ARE THE CURRENT ELEMENTS IN THE QUEUE ");
-	printQueue(myThreadArg->q);
-	if(getTransfer(myThreadArg->q, &tran)) {
-		fprintf(stderr, "get Message removes file %s with file size %d\n", tran.fileName, tran.fileSize);
-
-	}
-	printf("AFTER DELETE");
-	printQueue(myThreadArg->q);
-	//printQueue(myThreadArg->q); // temporary print of the queues contents
-	fclose(fp);
+	// printf("\n\n\n");
+	// printf("Closing file\n");
+	// Transfer tran; 
+	// getTransfer(myThreadArg->q, &tran) // remove from the queue
+	// fclose(fp);
 
 
-
+	printf("CLOSING CONNECTION!\n");
 	close(*connection);
 	pthread_exit(NULL);
     return NULL;
@@ -156,6 +176,7 @@ void * uiThread(void * arg) {
 
 		if(userOption == 1) {
 			//Show active transfers
+			printf("\n\nActive Tranfers\n\n\n");
 			printQueue(myThreadArg->q); 
 		} else if(userOption == 2) {
 			pthread_mutex_lock(&lock); //Locks
@@ -177,12 +198,14 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in serv;
 	struct sockaddr_in client;
 	int err;
-	pthread_t tid;
+	//pthread_t tid;
+	pthread_t tids[100];
 	int exitServer = 0;
 	ThreadArgs arg;
 	arg.exitCond = exitServer;
 	TransferQueue *q = createTransferQueue();
 	arg.q = q;
+	int canner = 0;
 
 	//threadData * data = malloc(sizeof(threadData));
 	
@@ -208,7 +231,7 @@ int main(int argc, char *argv[]) {
 
 	listen(userSocket, 10);
 
-	err = pthread_create(&tid, NULL, uiThread, (void *)&arg);
+	err = pthread_create(&tids[canner], NULL, uiThread, (void *)&arg);
 	if (err != 0){
         printf("Cannot create UI thread, error: %d", err);
         exit(-1);
@@ -217,12 +240,13 @@ int main(int argc, char *argv[]) {
     }
 
 	//int connection = accept(userSocket, (struct sockaddr *)&client, &socksize);
-	arg.connection = accept(userSocket, (struct sockaddr *)&client, &socksize);
+	arg.spot=0;
+	arg.connection[0] = accept(userSocket, (struct sockaddr *)&client, &socksize);
 
-	while(arg.connection && arg.exitCond == 0) {
+	while(arg.connection[canner] && arg.exitCond == 0) {
 		//Creates thread for new connection
 		//err = pthread_create(&tid, NULL, writeFile, (void *)&connection);
-		err = pthread_create(&tid, NULL, writeFile, (void *)&arg);
+		err = pthread_create(&tids[canner], NULL, writeFile, (void *)&arg);
 		if (err != 0){
             printf("Cannot create thread, error: %d", err);
             exit(-1);
@@ -231,7 +255,11 @@ int main(int argc, char *argv[]) {
         }
 
         //Accepts next connection
-		arg.connection = accept(userSocket, (struct sockaddr *)&client, &socksize);
+		canner++;	
+		arg.connection[canner] = accept(userSocket, (struct sockaddr *)&client, &socksize);
+		arg.spot=canner;
+	
+		printf("Accepted new conn");
 	}
 
 	close(userSocket);

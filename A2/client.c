@@ -38,6 +38,7 @@ int main(int argc, char *argv[]) {
 	int mysocket;
 	char ch;
 	int count = 0;
+	char * collision = malloc(sizeof(char));
 	struct sockaddr_in dest;
 	//struct timeval start, stop; Code for timing execution
     
@@ -119,25 +120,33 @@ int main(int argc, char *argv[]) {
 	if(send(mysocket, argv[3], strlen(argv[3]), 0) != (int)ntohll(filenameLength)) {
 		printf("Send failed!\n");
 	}
+	int test,i = 0;
+	test = recv(mysocket, collision, 1, 0); //Checks for collision
 
-	while ((ch = fgetc(stdin)) != EOF) {
-		if(count > MAXBUFLEN) {
-			count = 0;
-			if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
-				printf("Send failed!\n");
+	if(atoi(collision)) {
+		while ((ch = fgetc(stdin)) != EOF) {
+			if(count > MAXBUFLEN) {
+				count = 0;
+				if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
+					printf("Send failed!\n");
+				}
+				free(buffer);
+				buffer = calloc(MAXBUFLEN + 1,sizeof(char)); 
+			} else {
+				buffer[count] = ch;
+				count++;
 			}
-			free(buffer);
-			buffer = calloc(MAXBUFLEN + 1,sizeof(char)); 
-		} else {
-			buffer[count] = ch;
-			count++;
+
+			//printf("SEND IT! %d\n",i++);
 		}
+		if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
+			printf("Send failed!\n");
+		}
+
+	} else {
+		printf("Doesn't send because it's a bitch\n");
 	}
 
-	if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
-		printf("Send failed!\n");
-	}
- 
 	close(mysocket);
 	return EXIT_SUCCESS;
 }

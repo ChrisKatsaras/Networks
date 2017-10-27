@@ -28,7 +28,8 @@ typedef struct {
 
 typedef struct {
 	int exitCond;
-	int connection;
+	int connection[1000];
+	int spot;
 	TransferQueue *q;
 } ThreadArgs;
 
