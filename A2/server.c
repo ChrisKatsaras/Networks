@@ -98,7 +98,7 @@ void * writeFile(void * arg){
 
 	//TODO: Check filename for collision
 	
-	sendTransfer(myThreadArg->q, fileName, fileSize);
+	//sendTransfer(myThreadArg->q, fileName, fileSize);
 	if(noCollision(myThreadArg->q, fileName)) {
 		sendTransfer(myThreadArg->q, fileName, fileSize); // adds fileName and fileSize to our queue 
 	} else {
@@ -109,8 +109,8 @@ void * writeFile(void * arg){
 
 	//While there is more data to get
 	while(len > 0) {
-		buffer = calloc(MAXBUFLEN + 1,sizeof(char)); 
-		len = recv(*connection, buffer, MAXBUFLEN, 0);
+		buffer = calloc(chunkSize + 1,sizeof(char)); 
+		len = recv(*connection, buffer, chunkSize, 0);
 		buffer[len] = '\0';
 		//printf("%s\n", buffer); //Outputs message "chunk"
 		fputs(buffer, fp);
@@ -156,7 +156,7 @@ void * uiThread(void * arg) {
 
 		if(userOption == 1) {
 			//Show active transfers
-			//printQueue(myThreadArg->q); 
+			printQueue(myThreadArg->q); 
 		} else if(userOption == 2) {
 			pthread_mutex_lock(&lock); //Locks
 			*exit = 1;//Shuts down server
