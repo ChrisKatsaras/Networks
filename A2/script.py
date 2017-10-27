@@ -1,6 +1,12 @@
-import os
-import thread
 import sys
+import os
+if(sys.version_info[0] == 2):
+    import thread
+elif(sys.version_info[0] == 3):
+    import _thread
+
+
+
 
 from multiprocessing import Process
 
@@ -32,11 +38,11 @@ if __name__ == '__main__':
     p2.start()
     p3 = Process(target=func3(sys.argv[1]))
     p3.start()
-    p4 = Process(target=func4(sys.argv[1]))
-    p4.start()
+#    p4 = Process(target=func4(sys.argv[1]))
+ #   p4.start()
     p1.join()
     p2.join()
     p3.join()
-    p4.join()
+   # p4.join()
 
 
