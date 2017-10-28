@@ -39,41 +39,43 @@ void sendTransfer(TransferQueue *q, char *fileName, int fileSize) {
 	//fprintf(stderr, "%s\n", );
 }
 
-int getTransfer(TransferQueue *q, Transfer *tran_out) {
-	int success = 0;
-
+void getTransfer(TransferQueue *q, char *fileName) {
 	pthread_mutex_lock(&q->mutex);
-
 
 	while(q->head == NULL) {
 		pthread_cond_wait(&q->cond, &q->mutex);
 	}
 
-	TransferNode *oldHead = q->head;
-	*tran_out = oldHead->tran; 
-	q->head = oldHead->next;
-	if(q->head == NULL) {
-		q->tail = NULL;
-	}
+    TransferNode *tempNode = NULL;
+    TransferNode *currNode = NULL;
+    if(strcmp(q->head->tran.fileName, fileName) == 0) {
+        tempNode = q->head;
+        q->head = tempNode->next;
+        if(tempNode->next == NULL) {
+            q->tail = NULL;
+        }
 
-	free(oldHead);
-	success = 1;
+        free(tempNode);
 
-	pthread_mutex_unlock(&q->mutex);
+    }
+    else {
+        
+        currNode = q->head;
 
-	return success;
-}
+        while(currNode->next != NULL && strcmp(currNode->tran.fileName, fileName) != 0) {
+            tempNode = currNode;
+            currNode = currNode->next;
 
-void *workerFun(void *arg) {
-	ThreadArgs *args = (ThreadArgs*)arg;
 
-	int i = 0;
+        }
+        if(currNode->next == NULL) {
 
-	char *fileNames[10] = {"fileName1", "fileName2", "fileName3", "filename4", "fileName5", "fileName6", "fileName7", "filename8", "fileName9", "fileName10"};
-	int fileSizes[10] = {123, 315, 32532, 32324, 1224, 23424, 1, 2342, 7653, 2345};
-	for(i = 0; i < 10; i++) {
-		sendTransfer(args->q, fileNames[i], fileSizes[i]);
-	}
+            q->tail = tempNode;
 
-	return NULL;
+        }
+
+        tempNode->next = currNode->next;
+        free(currNode);   
+    }
+    pthread_mutex_unlock(&q->mutex);
 }

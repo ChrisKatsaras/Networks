@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
 	if(send(mysocket, argv[3], strlen(argv[3]), 0) != (int)ntohll(filenameLength)) {
 		printf("Send failed!\n");
 	}
-	int test,i = 0;
+	int test;
 	test = recv(mysocket, collision, 1, 0); //Checks for collision
 
 	if(atoi(collision)) {
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
 		}
 
 	} else {
-		printf("Doesn't send because it's a bitch\n");
+		printf("Couldn't write to file due to collision\n");
 	}
 
 	close(mysocket);

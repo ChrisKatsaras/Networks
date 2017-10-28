@@ -1,10 +1,7 @@
-all: myServer client
+all: client server
 
-myServer: server.c tranferQueue.c
-	gcc -Wall -g server.c tranferQueue.c -o server -lpthread
-	
 server: server.c
-	gcc -Wall -g server.c -o server -lpthread
+	gcc -Wall -g server.c tranferQueue.c -o server -lpthread
 
 client: client.c
 	gcc -Wall -g client.c -o client

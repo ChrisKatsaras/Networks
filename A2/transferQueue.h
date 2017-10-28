@@ -29,6 +29,7 @@ typedef struct {
 typedef struct {
 	int exitCond;
 	int connection[1000];
+	pthread_t tid;
 	int spot;
 	TransferQueue *q;
 } ThreadArgs;
@@ -40,7 +41,7 @@ TransferNode *initNode(char *fileName, int fileSize);
 
 void sendTransfer(TransferQueue *q, char *fileName, int fileSize);
 
-int getTransfer(TransferQueue *q, Transfer *msg_out);
+void getTransfer(TransferQueue *q, char* fileName);
 
 void *workerFun(void *arg);
 
