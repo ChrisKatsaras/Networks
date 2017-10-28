@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 	int mysocket;
 	char ch;
 	int count = 0;
-	char * collision = malloc(sizeof(char));
+	char * noCollision = malloc(sizeof(char));
 	struct sockaddr_in dest;
 	//struct timeval start, stop; Code for timing execution
     
@@ -121,9 +121,12 @@ int main(int argc, char *argv[]) {
 		printf("Send failed!\n");
 	}
 	int test;
-	test = recv(mysocket, collision, 1, 0); //Checks for collision
 
-	if(atoi(collision)) {
+	// if there is no fileName collision 1 is returned else 0
+	test = recv(mysocket, noCollision, 1, 0); //Checks for collision
+
+	// if there is no file collision we start sending data
+	if(atoi(noCollision)) {
 		while ((ch = fgetc(stdin)) != EOF) {
 			if(count > MAXBUFLEN) {
 				count = 0;
@@ -136,8 +139,6 @@ int main(int argc, char *argv[]) {
 				buffer[count] = ch;
 				count++;
 			}
-
-			//printf("SEND IT! %d\n",i++);
 		}
 		if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
 			printf("Send failed!\n");

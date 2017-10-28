@@ -20,54 +20,16 @@
 
 #define MAXBUFLEN 4096
 
-void printQueue(TransferQueue *q) {
+void * workerFunc(void * arg) {	
 
-	TransferNode *tempNode = q->head;
-
-	if(tempNode == NULL) {
-		printf("No files being transferred\n\n\n\n");
-	}
-	int tranNum = 1;
-	while(tempNode != NULL) {
-		printf("Transfer number: %d\tFile name: %s\tFile size: %d\n\n\n", tranNum, tempNode->tran.fileName, tempNode->tran.fileSize);
-
-		tempNode = tempNode->next;
-		tranNum++;
-	}
-}
-
-bool noCollision(TransferQueue *q, char *newFile) {
-
-	if(q == NULL) {
-		return true;
-	}
-	TransferNode *tempNode = q->head;
-
-	while(tempNode != NULL) {
-		printf("%s == %s", newFile, tempNode->tran.fileName);
-		if(strcmp(newFile, tempNode->tran.fileName) == 0) {
-			//collision detected here
-			return false;
-		}
-
-		tempNode = tempNode->next;
-	}
-
-	return true;
-}
-
-
-void * workerFunc(void * arg){	
 	ThreadArgs * myThreadArg = (ThreadArgs*)arg;
 	void* ret = NULL;
-	printf("Waiting to finish\n");
 	pthread_join(myThreadArg->tid, &ret);
-	
+
 	if(ret != NULL) {
 		getTransfer(myThreadArg->q, (char*)ret); // remove from the queue
 	}
-	
-	printf("Done\n");
+
 	pthread_exit(NULL);
 }
 
@@ -77,7 +39,6 @@ void * writeFile(void * arg){
 	char * fileName;
 	ThreadArgs * myThreadArg = (ThreadArgs*)arg;
 	int *connection = &myThreadArg->connection[myThreadArg->spot];
-	//int * connection = (int*)arg; //Connection var for socket
 	int len; //Len for transfer
 	int chunkSize;
 	int fileSize;
@@ -109,7 +70,6 @@ void * writeFile(void * arg){
 	printf("Filename length: %d\n", filenameLength);
 	printf("Filename %s\n", fileName);
 
-	//TODO: Check filename for collision
 	if(noCollision(myThreadArg->q, fileName)) {
 		strcpy(buffer, "1");
 		send(*connection, buffer, 1, 0);
@@ -119,12 +79,10 @@ void * writeFile(void * arg){
 		while(len > 0) {
 			buffer = calloc(chunkSize + 1,sizeof(char)); 
 			len = recv(*connection, buffer, chunkSize, 0);
-			//printf("%d\n", len);
 			buffer[len] = '\0';
 			//printf("%s\n", buffer); //Outputs message "chunk"
 			fputs(buffer, fp);
 			free(buffer);
-			//printf("RECV\n");
 		}
 
 		printf("\n\n\n");
@@ -132,12 +90,11 @@ void * writeFile(void * arg){
 		printf("Closing transfer thread!\n");
 		close(*connection);
 	    pthread_exit((void*)fileName);
-		//getTransfer(myThreadArg->q, &tran); // remove from the queue
 		fclose(fp);
 	} else {
 		strcpy(buffer, "0");
 		send(*connection, buffer, 1, 0);
-		printf("ERROR FILE_COLLISION: CURRENTLY RUNNING THREAD WITH IDENTICAL FILE_NAME %s\n", fileName);
+		printf("ERROR FILE_COLLISION: CURRENTLY RUNNING THREAD WITH IDENTICAL FILE_NAME: %s\n", fileName);
 		printf("Closing transfer thread!\n");
 		close(*connection);
 	    pthread_exit(NULL);
@@ -145,7 +102,6 @@ void * writeFile(void * arg){
 }
 
 void * uiThread(void * arg) {	
-	//int * exit = (int *) arg;
 	ThreadArgs * myThreadArg = (ThreadArgs*)arg;
 	int * exit = &myThreadArg->exitCond;
 	int userOption;
@@ -184,7 +140,6 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in serv;
 	struct sockaddr_in client;
 	int err;
-	//pthread_t tid;
 	pthread_t tids[100];
 	pthread_t workerID[100];
 	int exitServer = 0;
@@ -193,8 +148,6 @@ int main(int argc, char *argv[]) {
 	TransferQueue *q = createTransferQueue();
 	arg.q = q;
 	int counter = 0;
-
-	//threadData * data = malloc(sizeof(threadData));
 	
 	socklen_t socksize = sizeof(struct sockaddr_in);
 	if(argc == 2) {
@@ -239,6 +192,7 @@ int main(int argc, char *argv[]) {
         	printf("Thread created\n");
         }
         arg.tid = tids[counter];//Worker
+        //creates a thread for the worker function 
         err = pthread_create(&workerID[counter], NULL, workerFunc, (void *)&arg);
 		if (err != 0){
             printf("Cannot create thread, error: %d", err);
@@ -251,7 +205,6 @@ int main(int argc, char *argv[]) {
         counter++;	
 		arg.connection[counter] = accept(userSocket, (struct sockaddr *)&client, &socksize);
 		arg.spot=counter;
-		//arg.tid = tids[counter];
 	}
 
 	close(userSocket);
