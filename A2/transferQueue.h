@@ -32,6 +32,7 @@ typedef struct {
 	int connection[1000];
 	pthread_t tid;
 	int spot;
+	char * portNumber;
 	TransferQueue *q;
 } ThreadArgs;
 

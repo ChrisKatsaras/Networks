@@ -1,6 +1,6 @@
 /**
  * server.c
- * Christopher Katsaras
+ * Christopher Katsaras & Connor Geddes
  */
 #include <stdio.h>
 #include <ctype.h>
@@ -101,7 +101,7 @@ void * writeFile(void * arg){
 	}
 }
 
-void * uiThread(void * arg) {	
+void * uiThread(void * arg) {
 	ThreadArgs * myThreadArg = (ThreadArgs*)arg;
 	int * exit = &myThreadArg->exitCond;
 	int userOption;
@@ -130,34 +130,27 @@ void * uiThread(void * arg) {
 	}
 	printf("Exiting UI thread\n");
 	pthread_exit(NULL);
-    return NULL;
 }
 
-int main(int argc, char *argv[]) {
-
-	char * portNumber;
+void * mainThreadFunc(void * args) {
+	ThreadArgs * arg = (ThreadArgs*)args;
+	ThreadArgs argVal;
+	argVal = *arg;
+	char * portNumber = NULL;
 	int userSocket; 
 	struct sockaddr_in serv;
 	struct sockaddr_in client;
 	int err;
 	pthread_t tids[100];
 	pthread_t workerID[100];
-	int exitServer = 0;
-	ThreadArgs arg;
-	arg.exitCond = exitServer;
-	TransferQueue *q = createTransferQueue();
-	arg.q = q;
 	int counter = 0;
-	
-	socklen_t socksize = sizeof(struct sockaddr_in);
-	if(argc == 2) {
-		portNumber = argv[1];
-		printf("Listening on port %s\n", portNumber);
-	} else {
-		perror("Error: Missing port number!\n");
-		exit(EXIT_FAILURE);
-	}
 
+	portNumber = (char*)malloc(sizeof(char) * (strlen(arg->portNumber) + 1));
+	strcpy(portNumber,arg->portNumber);
+	//printf("%s\n",portNumber);
+
+	socklen_t socksize = sizeof(struct sockaddr_in);
+	
 	memset(&serv, 0, sizeof(serv));
 	serv.sin_family = AF_INET;                
 	serv.sin_addr.s_addr = htonl(INADDR_ANY); 
@@ -171,29 +164,22 @@ int main(int argc, char *argv[]) {
 
 	listen(userSocket, 10);
 
-	err = pthread_create(&tids[counter], NULL, uiThread, (void *)&arg);
-	if (err != 0){
-        printf("Cannot create UI thread, error: %d", err);
-        exit(-1);
-    } else {
-    	printf("UI thread created\n");
-    }
-    counter++;
-
-	arg.spot=counter;
-	arg.connection[counter] = accept(userSocket, (struct sockaddr *)&client, &socksize);
-	while(arg.connection[counter] && arg.exitCond == 0) {
+	argVal.connection[counter] = accept(userSocket, (struct sockaddr *)&client, &socksize);
+	argVal.spot=counter;
+	while(argVal.connection[counter]) {
 		//Creates thread for new connection
-		err = pthread_create(&tids[counter], NULL, writeFile, (void *)&arg);
+		printf("%d", argVal.connection[counter]);
+		printf("%d", argVal.spot);
+		err = pthread_create(&tids[counter], NULL, writeFile, (void *)&argVal);
 		if (err != 0){
             printf("Cannot create thread, error: %d", err);
             exit(-1);
         } else {
         	printf("Thread created\n");
         }
-        arg.tid = tids[counter];//Worker
+        argVal.tid = tids[counter];//Worker
         //creates a thread for the worker function 
-        err = pthread_create(&workerID[counter], NULL, workerFunc, (void *)&arg);
+        err = pthread_create(&workerID[counter], NULL, workerFunc, (void *)&argVal);
 		if (err != 0){
             printf("Cannot create thread, error: %d", err);
             exit(-1);
@@ -203,10 +189,56 @@ int main(int argc, char *argv[]) {
 
         //Accepts next connection
         counter++;	
-		arg.connection[counter] = accept(userSocket, (struct sockaddr *)&client, &socksize);
-		arg.spot=counter;
+		argVal.connection[counter] = accept(userSocket, (struct sockaddr *)&client, &socksize);
+		argVal.spot=counter;
 	}
 
 	close(userSocket);
+	return 0;
+}
+
+int main(int argc, char *argv[]) {
+
+	char * portNumber;
+	ThreadArgs arg;
+	int err;
+	pthread_t mainTID;
+	pthread_t uiTID;
+	int exitServer = 0;
+	TransferQueue *q = createTransferQueue();
+	arg.q = q;
+	arg.exitCond = exitServer;
+
+	if(argc == 2) {
+		portNumber = argv[1];
+		arg.portNumber = (char*)malloc(sizeof(char) * (strlen(portNumber) + 1));
+		strcpy(arg.portNumber,portNumber);
+		printf("Listening on port %s\n", portNumber);
+	} else {
+		perror("Error: Missing port number!\n");
+		exit(EXIT_FAILURE);
+	}
+
+	err = pthread_create(&mainTID, NULL, mainThreadFunc, (void *)&arg);
+	if (err != 0){
+        printf("Cannot create the main thread, error: %d", err);
+        exit(-1);
+    } else {
+    	printf("Main thread created\n");
+    }
+
+    err = pthread_create(&uiTID, NULL, uiThread, (void *)&arg);
+	if (err != 0){
+        printf("Cannot create UI thread, error: %d", err);
+        exit(-1);
+    } else {
+    	printf("UI thread created\n");
+    }
+
+    while(!exitServer) {
+    	pthread_join(uiTID, NULL);
+    	exitServer = 1;
+    }
+
 	return 0;
 }

@@ -1,6 +1,6 @@
 /**
  * client.c
- * Christopher Katsaras
+ * Christopher Katsaras & Connor Geddes
  */
 #include <stdio.h>
 #include <stdbool.h>
@@ -102,23 +102,27 @@ int main(int argc, char *argv[]) {
 	uint64_t chunkSize = htonll(atoi(argv[2]));
 	if(send(mysocket, &chunkSize, sizeof(uint64_t), 0) != sizeof(uint64_t)) {
 		printf("Send failed!\n");
+		return EXIT_FAILURE;
 	}
 
 	//Sends file size
 	uint64_t filesize = htonll(atoi(argv[4]));
 	if(send(mysocket, &filesize, sizeof(uint64_t), 0) != sizeof(uint64_t)) {
 		printf("Send failed!\n");
+		return EXIT_FAILURE;
 	}
 
 	//Sends filenames length
 	uint64_t filenameLength = htonll(atoi(argv[5]));
 	if(send(mysocket, &filenameLength, sizeof(uint64_t), 0) != sizeof(uint64_t)) {
 		printf("Send failed!\n");
+		return EXIT_FAILURE;
 	}
 
 	//Sends filename
 	if(send(mysocket, argv[3], strlen(argv[3]), 0) != (int)ntohll(filenameLength)) {
 		printf("Send failed!\n");
+		return EXIT_FAILURE;
 	}
 	int test;
 
@@ -132,6 +136,7 @@ int main(int argc, char *argv[]) {
 				count = 0;
 				if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
 					printf("Send failed!\n");
+					return EXIT_FAILURE;
 				}
 				free(buffer);
 				buffer = calloc(MAXBUFLEN + 1,sizeof(char)); 
@@ -141,7 +146,8 @@ int main(int argc, char *argv[]) {
 			}
 		}
 		if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
-			printf("Send failed!\n");
+			printf("Send failed1!\n");
+			return EXIT_FAILURE;
 		}
 
 	} else {
