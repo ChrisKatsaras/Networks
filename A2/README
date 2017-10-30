@@ -3,6 +3,7 @@ CIS * 3210
 October 31st, 2017
 
 Christopher Katsaras & Connor Geddes
+Assigned port number = 12040
 
 **********************************************
 Compile:
@@ -39,6 +40,16 @@ Run:
 File name collisions
 **********************************************
 
-We decided our resolution for filname collision would be to terminate connection in the event that a collision occured and
-prompt the user that a file with the same name is already being written to.
+We decided our resolution for filname collision would be to terminate connection in the event that a collision occured and prompt the user that a file with the same name is already being written to.
 
+**********************************************
+TO RUN CLIENT TESTING SCRIPT: RUNS ON PORT 12040
+**********************************************
+	
+	I have created a testing script that will run multiple clients at once, this script will have seperate clients send different files to the server.
+
+	FOR LOCALHOST:
+		If you are testing on local host, type "python localhost:portnumber"
+
+	FOR LINUX.SOCS.UOGUELPH.CA:
+		If you are testing on the University's Linux terminals, "type python script.py servername" where servername is the name of the server. Some examples of SOCS servers are ginny.socs.uoguelph.ca , fred.socs.uoguelph.ca , george.socs.uoguelph.ca. This script has been created to make grading easier for you but if for any reason you are having issues using it, please feel free to message me! :) 

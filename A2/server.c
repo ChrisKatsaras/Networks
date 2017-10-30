@@ -47,28 +47,29 @@ void * writeFile(void * arg){
 
 	//Gets chunksize
 	len = recv(*connection, &t, sizeof(uint64_t), 0);
-	t = ntohll(t);
+	t = ((uint64_t) t << 32) + ntohl(t >> 32);
 	chunkSize = t;
 
 	//Gets gets file size
 	len = recv(*connection, &t, sizeof(uint64_t), 0);
-	t = ntohll(t);
+	t = ((uint64_t) t << 32) + ntohl(t >> 32);
 	fileSize = t;
 
 	//Gets filename length
 	len = recv(*connection, &t, sizeof(uint64_t), 0);
-	t = ntohll(t);
+	t = ((uint64_t) t << 32) + ntohl(t >> 32);
 	filenameLength = t;
-	fileName = malloc(sizeof(filenameLength) + 1);
+	fileName = malloc(sizeof(char) * (filenameLength + 1));
 
 	//Gets the filename
 	len = recv(*connection, fileName, filenameLength, 0);
 	fileName[filenameLength] = '\0';
 
-	printf("Chunksize: %d\n", chunkSize);
+	//For testing purposes
+	/*printf("Chunksize: %d\n", chunkSize);
 	printf("Filesize: %d\n", fileSize);
 	printf("Filename length: %d\n", filenameLength);
-	printf("Filename %s\n", fileName);
+	printf("Filename %s\n", fileName);*/
 
 	if(noCollision(myThreadArg->q, fileName)) {
 		strcpy(buffer, "1");
@@ -77,7 +78,7 @@ void * writeFile(void * arg){
 		fp = fopen(fileName ,"a");
 		//While there is more data to get
 		while(len > 0) {
-			buffer = calloc(chunkSize + 1,sizeof(char)); 
+			buffer = malloc(sizeof(char)*(chunkSize + 1));
 			len = recv(*connection, buffer, chunkSize, 0);
 			buffer[len] = '\0';
 			//printf("%s\n", buffer); //Outputs message "chunk"
@@ -118,7 +119,9 @@ void * uiThread(void * arg) {
 
 		if(userOption == 1) {
 			//Show active transfers
-			printf("\n\nActive Tranfers\n\n\n");
+			printf("\n\n****************\n");
+			printf("Active Tranfers\n");
+			printf("****************\n\n\n");
 			printQueue(myThreadArg->q); 
 		} else if(userOption == 2) {
 			pthread_mutex_lock(&lock); //Locks
@@ -147,7 +150,6 @@ void * mainThreadFunc(void * args) {
 
 	portNumber = (char*)malloc(sizeof(char) * (strlen(arg->portNumber) + 1));
 	strcpy(portNumber,arg->portNumber);
-	//printf("%s\n",portNumber);
 
 	socklen_t socksize = sizeof(struct sockaddr_in);
 	
@@ -162,29 +164,24 @@ void * mainThreadFunc(void * args) {
 		exit(EXIT_FAILURE);
 	}
 
-	listen(userSocket, 10);
+	listen(userSocket, 1000);
 
 	argVal.connection[counter] = accept(userSocket, (struct sockaddr *)&client, &socksize);
 	argVal.spot=counter;
 	while(argVal.connection[counter]) {
 		//Creates thread for new connection
-		printf("%d", argVal.connection[counter]);
-		printf("%d", argVal.spot);
 		err = pthread_create(&tids[counter], NULL, writeFile, (void *)&argVal);
 		if (err != 0){
             printf("Cannot create thread, error: %d", err);
             exit(-1);
-        } else {
-        	printf("Thread created\n");
-        }
+        } 
+
         argVal.tid = tids[counter];//Worker
         //creates a thread for the worker function 
         err = pthread_create(&workerID[counter], NULL, workerFunc, (void *)&argVal);
 		if (err != 0){
             printf("Cannot create thread, error: %d", err);
             exit(-1);
-        } else {
-        	printf("Thread created\n");
         }
 
         //Accepts next connection
