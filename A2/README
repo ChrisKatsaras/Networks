@@ -53,3 +53,46 @@ TO RUN CLIENT TESTING SCRIPT: RUNS ON PORT 12040
 
 	FOR LINUX.SOCS.UOGUELPH.CA:
 		If you are testing on the University's Linux terminals, "type python script.py servername" where servername is the name of the server. Some examples of SOCS servers are ginny.socs.uoguelph.ca , fred.socs.uoguelph.ca , george.socs.uoguelph.ca. This script has been created to make grading easier for you but if for any reason you are having issues using it, please feel free to message me! :) 
+
+**********************************************
+Example server output
+**********************************************
+
+	Server:
+		 ./server 12040
+			Listening on port 12040
+			Main thread created
+			UI thread created
+			Choose an option:
+			1: Show active transfers
+			2: Shut down server
+			1
+
+
+			****************
+			Active Tranfers
+			****************
+
+
+			Transfer number: 1	File name: test0.txt	File size: 289768942
+
+
+			Transfer number: 2	File name: test1.txt	File size: 289768942
+
+
+			Choose an option:
+			1: Show active transfers
+			2: Shut down server
+
+
+
+			Closing file
+			Closing transfer thread!
+
+
+
+			Closing file
+			Closing transfer thread!
+
+
+
