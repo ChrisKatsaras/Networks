@@ -25,7 +25,6 @@ void * workerFunc(void * arg) {
 	ThreadArgs * myThreadArg = (ThreadArgs*)arg;
 	void* ret = NULL;
 	pthread_join(myThreadArg->tid, &ret);
-
 	if(ret != NULL) {
 		getTransfer(myThreadArg->q, (char*)ret); // remove from the queue
 	}
@@ -33,7 +32,7 @@ void * workerFunc(void * arg) {
 	pthread_exit(NULL);
 }
 
-void * writeFile(void * arg){	
+void * writeFile(void * arg){ 
 	FILE * fp; //File pointer
 	char * buffer = malloc(sizeof(MAXBUFLEN + 1)); //Buffer for transfer
 	char * fileName;
@@ -73,7 +72,6 @@ void * writeFile(void * arg){
 
 	if(noCollision(myThreadArg->q, fileName)) {
 		strcpy(buffer, "1");
-		send(*connection, buffer, 1, 0);
 		sendTransfer(myThreadArg->q, fileName, fileSize); // adds fileName and fileSize to our queue 
 		fp = fopen(fileName ,"a");
 		//While there is more data to get
@@ -90,11 +88,10 @@ void * writeFile(void * arg){
 		printf("Closing file\n");
 		printf("Closing transfer thread!\n");
 		close(*connection);
-	    pthread_exit((void*)fileName);
 		fclose(fp);
+	    pthread_exit((void*)fileName);
 	} else {
 		strcpy(buffer, "0");
-		send(*connection, buffer, 1, 0);
 		printf("ERROR FILE_COLLISION: CURRENTLY RUNNING THREAD WITH IDENTICAL FILE_NAME: %s\n", fileName);
 		printf("Closing transfer thread!\n");
 		close(*connection);
@@ -164,7 +161,7 @@ void * mainThreadFunc(void * args) {
 		exit(EXIT_FAILURE);
 	}
 
-	listen(userSocket, 1000);
+	listen(userSocket, 100);
 
 	argVal.connection[counter] = accept(userSocket, (struct sockaddr *)&client, &socksize);
 	argVal.spot=counter;

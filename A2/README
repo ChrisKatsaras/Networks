@@ -43,16 +43,23 @@ File name collisions
 We decided our resolution for filname collision would be to terminate connection in the event that a collision occured and prompt the user that a file with the same name is already being written to.
 
 **********************************************
-TO RUN CLIENT TESTING SCRIPT: RUNS ON PORT 12040
+Testing with multiple clients
 **********************************************
-	
-	I have created a testing script that will run multiple clients at once, this script will have seperate clients send different files to the server.
+	Unfortunately, due to time constraints we were unable to complete a functioning testing script. This was due to a variety of factors which included the Python's GIL and the difficulty is causes with executing multi-threaded code in a script.
+	Now, while there is not script, we will provide you with the tools necessary to test our asynchronous server!
 
-	FOR LOCALHOST:
-		If you are testing on local host, type "python localhost:portnumber"
+	To test, simply copy client commands like these into 2 seperate terminals. (Don't worry, the files are large enough that you will have time to switch between terminals!)
 
-	FOR LINUX.SOCS.UOGUELPH.CA:
-		If you are testing on the University's Linux terminals, "type python script.py servername" where servername is the name of the server. Some examples of SOCS servers are ginny.socs.uoguelph.ca , fred.socs.uoguelph.ca , george.socs.uoguelph.ca. This script has been created to make grading easier for you but if for any reason you are having issues using it, please feel free to message me! :) 
+	terminal1:
+		./client ginny.socs.uoguelph.ca:12040 4096 test1.txt 9123213 9 < eightydays.txt
+
+	terminal2:
+		./client ginny.socs.uoguelph.ca:12040 4096 test2.txt 9123213 9 < eightydays.txt
+
+
+	If you wish to see collision occur, you can simply change terminal twos filenameToSave to be test1.txt!
+
+	We both apologise for the lack of script and hope that these instructions will still allow you to test our program with ease. If you have any questions about testing our program, we would be more than happy to explain in greater detail.
 
 **********************************************
 Example server output

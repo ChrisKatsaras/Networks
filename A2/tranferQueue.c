@@ -45,7 +45,7 @@ void getTransfer(TransferQueue *q, char *fileName) {
 
     TransferNode *tempNode = NULL;
     TransferNode *currNode = NULL;
-    // checks if the fileName is in the first Node 
+    // checks if the fileName is in the first Node
     if(strcmp(q->head->tran.fileName, fileName) == 0)
     {
         tempNode = q->head; // saves the location of the node to delete

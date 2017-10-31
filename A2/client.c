@@ -37,9 +37,7 @@ int main(int argc, char *argv[]) {
 	int mysocket;
 	char ch;
 	int count = 0;
-	char * noCollision = malloc(sizeof(char));
 	struct sockaddr_in dest;
-	//struct timeval start, stop; Code for timing execution
     
  	if(argc != 2 && argc != 3 && argc != 4 && argc != 5 && argc != 6) {
  		perror("Wrong number of arguements!");
@@ -101,7 +99,7 @@ int main(int argc, char *argv[]) {
 	uint64_t t1 = atoi(argv[2]);
 	uint64_t chunkSize = (((uint64_t)htonl(t1)) << 32) + htonl(t1 >> 32);
 	if(send(mysocket, &chunkSize, sizeof(uint64_t), 0) != sizeof(uint64_t)) {
-		printf("Send failed!\n");
+		printf("Failed to send chunkSize\n");
 		return EXIT_FAILURE;
 	}
 
@@ -109,7 +107,7 @@ int main(int argc, char *argv[]) {
 	uint64_t t2 = atoi(argv[4]);
 	uint64_t filesize = (((uint64_t)htonl(t2)) << 32) + htonl(t2 >> 32);
 	if(send(mysocket, &filesize, sizeof(uint64_t), 0) != sizeof(uint64_t)) {
-		printf("Send failed!\n");
+		printf("Failed to send file size\n");
 		return EXIT_FAILURE;
 	}
 
@@ -117,43 +115,35 @@ int main(int argc, char *argv[]) {
 	uint64_t t3 = atoi(argv[5]);
 	uint64_t filenameLength = (((uint64_t)htonl(t3)) << 32) + htonl(t3 >> 32);
 	if(send(mysocket, &filenameLength, sizeof(uint64_t), 0) != sizeof(uint64_t)) {
-		printf("Send failed!\n");
+		printf("Failed to send filename length\n");
 		return EXIT_FAILURE;
 	}
 
 	//Sends filename
-	if(send(mysocket, argv[3], strlen(argv[3]), 0) != (int)ntohll(filenameLength)) {
-		printf("Send failed!\n");
+	if(send(mysocket, argv[3], strlen(argv[3]), 0) != atoi(argv[5])) {
+		printf("failed to send filename\n");
 		return EXIT_FAILURE;
 	}
 
-	// if there is no fileName collision 1 is returned else 0
-	recv(mysocket, noCollision, 1, 0); //Checks for collision
-
-	// if there is no file collision we start sending data
-	if(atoi(noCollision)) {
-		while ((ch = fgetc(stdin)) != EOF) {
-			if(count > MAXBUFLEN) {
-				count = 0;
-				if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
-					printf("Send failed!\n");
-					return EXIT_FAILURE;
-				}
-				free(buffer);
-				buffer = calloc(MAXBUFLEN + 1,sizeof(char)); 
-			} else {
-				buffer[count] = ch;
-				count++;
+	while ((ch = fgetc(stdin)) != EOF) {
+		if(count > MAXBUFLEN) {
+			count = 0;
+			if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
+				printf("Send failed!\n");
+				return EXIT_FAILURE;
 			}
+			free(buffer);
+			buffer = calloc(MAXBUFLEN + 1,sizeof(char)); 
+		} else {
+			buffer[count] = ch;
+			count++;
 		}
-		if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
-			printf("Send failed1!\n");
-			return EXIT_FAILURE;
-		}
-
-	} else {
-		printf("Couldn't write to file due to collision\n");
 	}
+	if(send(mysocket, buffer, strlen(buffer), 0) != strlen(buffer)) {
+		printf("Send failed1!\n");
+		return EXIT_FAILURE;
+	}
+
 
 	close(mysocket);
 	return EXIT_SUCCESS;
