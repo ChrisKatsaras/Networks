@@ -14,7 +14,6 @@
 #include <netdb.h>
 #include <sys/time.h>
 #include <stdint.h>
-
  
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
@@ -99,21 +98,24 @@ int main(int argc, char *argv[]) {
 	}
 
 	//Sends chunk size
-	uint64_t chunkSize = htonll(atoi(argv[2]));
+	uint64_t t1 = atoi(argv[2]);
+	uint64_t chunkSize = (((uint64_t)htonl(t1)) << 32) + htonl(t1 >> 32);
 	if(send(mysocket, &chunkSize, sizeof(uint64_t), 0) != sizeof(uint64_t)) {
 		printf("Send failed!\n");
 		return EXIT_FAILURE;
 	}
 
 	//Sends file size
-	uint64_t filesize = htonll(atoi(argv[4]));
+	uint64_t t2 = atoi(argv[4]);
+	uint64_t filesize = (((uint64_t)htonl(t2)) << 32) + htonl(t2 >> 32);
 	if(send(mysocket, &filesize, sizeof(uint64_t), 0) != sizeof(uint64_t)) {
 		printf("Send failed!\n");
 		return EXIT_FAILURE;
 	}
 
 	//Sends filenames length
-	uint64_t filenameLength = htonll(atoi(argv[5]));
+	uint64_t t3 = atoi(argv[5]);
+	uint64_t filenameLength = (((uint64_t)htonl(t3)) << 32) + htonl(t3 >> 32);
 	if(send(mysocket, &filenameLength, sizeof(uint64_t), 0) != sizeof(uint64_t)) {
 		printf("Send failed!\n");
 		return EXIT_FAILURE;
@@ -124,10 +126,9 @@ int main(int argc, char *argv[]) {
 		printf("Send failed!\n");
 		return EXIT_FAILURE;
 	}
-	int test;
 
 	// if there is no fileName collision 1 is returned else 0
-	test = recv(mysocket, noCollision, 1, 0); //Checks for collision
+	recv(mysocket, noCollision, 1, 0); //Checks for collision
 
 	// if there is no file collision we start sending data
 	if(atoi(noCollision)) {
